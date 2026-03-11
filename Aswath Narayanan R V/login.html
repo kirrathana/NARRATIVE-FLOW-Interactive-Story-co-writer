@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Story Co-Writer – Login</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Forest Background ── */
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d1b2a;
+      overflow: hidden;
+    }
+
+    .forest {
+      position: fixed; inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, #1a3a5c 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 30% 0%, #0f2a45 0%, transparent 60%),
+        linear-gradient(180deg, #0a1520 0%, #112235 40%, #0d1b2a 100%);
+    }
+
+    /* Layered SVG trees */
+    .forest svg { position: absolute; bottom: 0; width: 100%; }
+
+    /* Mist layers */
+    .mist {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 30%;
+      background: linear-gradient(to top, rgba(100,160,220,0.08) 0%, transparent 100%);
+      animation: driftMist 8s ease-in-out infinite alternate;
+    }
+    .mist2 {
+      height: 20%;
+      animation-duration: 12s;
+      animation-direction: alternate-reverse;
+      opacity: 0.5;
+    }
+    @keyframes driftMist {
+      from { transform: translateX(-2%); }
+      to   { transform: translateX(2%); }
+    }
+
+    /* Moon glow */
+    .moon {
+      position: absolute;
+      top: 8%; left: 50%; transform: translateX(-50%);
+      width: 90px; height: 90px;
+      background: radial-gradient(circle, rgba(180,210,240,0.55) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: moonPulse 4s ease-in-out infinite;
+    }
+    @keyframes moonPulse {
+      0%,100% { opacity: 0.7; }
+      50%      { opacity: 1; }
+    }
+
+    /* ── Glassmorphism Card ── */
+    .card {
+      position: relative; z-index: 10;
+      width: 420px;
+      background: rgba(180, 205, 230, 0.18);
+      backdrop-filter: blur(18px) saturate(1.4);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 38px 36px 32px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.15) inset;
+      animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+
+    /* Close button */
+    .close-btn {
+      position: absolute; top: 14px; right: 14px;
+      width: 28px; height: 28px;
+      background: #1a2e42;
+      border: none; border-radius: 6px;
+      color: #aac; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .close-btn:hover { background: #243d56; }
+
+    h2 {
+      text-align: center;
+      color: #e0eaf5;
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 26px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Form Fields ── */
+    .field {
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .field input {
+      width: 100%;
+      padding: 13px 42px 13px 14px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 10px;
+      color: #e0eaf5;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.25s, background 0.25s;
+    }
+    .field input::placeholder { color: rgba(180,210,240,0.65); }
+    .field input:focus {
+      border-color: rgba(120,180,240,0.7);
+      background: rgba(255,255,255,0.18);
+    }
+    .field .icon {
+      position: absolute; right: 13px; top: 50%;
+      transform: translateY(-50%);
+      color: rgba(160,200,240,0.7);
+      font-size: 1rem; pointer-events: none;
+    }
+    .field .toggle-pw {
+      pointer-events: all; cursor: pointer;
+    }
+
+    /* ── Row: Remember me + Forgot ── */
+    .row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px;
+      font-size: 0.83rem;
+    }
+    .row label { display: flex; align-items: center; gap: 6px; color: #b0c8e0; cursor: pointer; }
+    .row input[type=checkbox] { accent-color: #5ba3d9; width: 14px; height: 14px; }
+    .row a { color: #b0c8e0; text-decoration: none; }
+    .row a:hover { color: #fff; text-decoration: underline; }
+
+    /* ── Primary Button ── */
+    .btn-primary {
+      width: 100%;
+      padding: 13px;
+      background: #1a2e42;
+      color: #e0eaf5;
+      border: none; border-radius: 10px;
+      font-size: 1rem; font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.5px;
+    }
+    .btn-primary:hover { background: #243d56; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: 20px 0;
+      color: rgba(180,210,240,0.5);
+      font-size: 0.82rem;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* ── Social Buttons ── */
+    .social-btns { display: flex; flex-direction: column; gap: 11px; }
+
+    .btn-social {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08);
+      color: #dce8f5;
+      font-size: 0.9rem; font-weight: 500;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-social:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.35); }
+
+    .btn-social svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    /* ── Footer link ── */
+    .footer-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.84rem;
+      color: rgba(180,210,240,0.75);
+    }
+    .footer-link a { color: #7ec8f0; font-weight: 600; text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
+
+    /* ── Toast (password save prompt) ── */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: rgba(20,40,60,0.96);
+      border: 1px solid rgba(120,180,240,0.35);
+      backdrop-filter: blur(12px);
+      color: #d0e8f8;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+      z-index: 999;
+      transition: transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.4s;
+      opacity: 0;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast button {
+      padding: 5px 14px;
+      border-radius: 7px;
+      border: none; cursor: pointer;
+      font-size: 0.82rem; font-weight: 600;
+    }
+    .toast .save-btn   { background: #3a87c8; color: #fff; }
+    .toast .nosave-btn { background: transparent; color: #8ab; border: 1px solid rgba(255,255,255,0.2); }
+
+    /* ── Register panel (hidden by default) ── */
+    #register-panel { display: none; }
+
+    /* Error */
+    .error-msg {
+      color: #ff8080;
+      font-size: 0.8rem;
+      margin-top: -12px;
+      margin-bottom: 12px;
+      padding-left: 4px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Forest Background ── -->
+<div class="forest">
+  <div class="moon"></div>
+
+  <!-- Back trees (darkest) -->
+  <svg viewBox="0 0 1440 320" preserveAspectRatio="none" style="height:72vh; opacity:0.55;">
+    <path fill="#08111a" d="
+      M0,320 L0,200 L30,160 L60,200 L60,140 L90,90 L120,140 L120,180 L150,120 L180,70
+      L210,120 L210,160 L240,100 L270,50 L300,100 L300,140 L330,80 L360,30 L390,80
+      L390,120 L420,60 L450,20 L480,60 L480,100 L510,50 L540,10 L570,50 L570,90
+      L600,40 L630,0 L660,40 L660,80 L690,30 L720,0 L750,30 L750,70 L780,20 L810,0
+      L840,20 L840,60 L870,10 L900,0 L930,10 L930,50 L960,20 L990,0 L1020,20
+      L1020,60 L1050,10 L1080,0 L1110,10 L1110,50 L1140,20 L1170,0 L1200,20
+      L1200,60 L1230,20 L1260,0 L1290,20 L1290,60 L1320,30 L1350,10 L1380,30
+      L1410,60 L1440,40 L1440,320 Z"/>
+  </svg>
+
+  <!-- Mid trees -->
+  <svg viewBox="0 0 1440 300" preserveAspectRatio="none" style="height:65vh; opacity:0.72;">
+    <path fill="#0c1e30" d="
+      M0,300 L0,220 L20,180 L40,220 L40,160 L60,110 L80,160 L80,200 L110,130
+      L140,80 L170,130 L170,170 L200,110 L230,60 L260,110 L260,150 L300,90
+      L340,40 L380,90 L380,130 L420,70 L460,20 L500,70 L500,110 L540,50 L580,10
+      L620,50 L620,90 L660,40 L700,0 L740,40 L740,80 L780,30 L820,0 L860,30
+      L860,70 L900,20 L940,0 L980,20 L980,60 L1020,10 L1060,0 L1100,10 L1100,50
+      L1140,20 L1180,0 L1220,20 L1220,60 L1260,30 L1300,10 L1340,30 L1380,60
+      L1440,45 L1440,300 Z"/>
+  </svg>
+
+  <!-- Front trees (lightest) -->
+  <svg viewBox="0 0 1440 260" preserveAspectRatio="none" style="height:55vh; opacity:0.9;">
+    <path fill="#101f2e" d="
+      M0,260 L0,200 L15,165 L30,200 L30,150 L50,100 L70,150 L70,180 L100,110
+      L130,60 L160,110 L160,145 L195,85 L230,35 L265,85 L265,120 L305,55
+      L345,5 L385,55 L385,95 L430,35 L475,0 L520,35 L520,75 L565,20 L610,0
+      L655,20 L655,58 L700,15 L745,0 L790,15 L790,52 L835,10 L880,0 L925,10
+      L925,48 L970,12 L1015,0 L1060,12 L1060,48 L1105,15 L1150,0 L1195,15
+      L1195,52 L1240,18 L1285,0 L1330,18 L1375,48 L1440,35 L1440,260 Z"/>
+  </svg>
+
+  <!-- Ground -->
+  <svg viewBox="0 0 1440 80" preserveAspectRatio="none" style="height:12vh;">
+    <rect width="1440" height="80" fill="#080f18"/>
+  </svg>
+
+  <div class="mist"></div>
+  <div class="mist mist2"></div>
+</div>
+
+<!-- ── Login Card ── -->
+<div class="card" id="login-panel">
+  <button class="close-btn" onclick="this.closest('.card').style.opacity='0'">✕</button>
+  <h2>Login</h2>
+
+  <form id="login-form" autocomplete="on" onsubmit="handleLogin(event)">
+    <div class="field">
+      <input type="email" name="email" id="login-email"
+             placeholder="Email" autocomplete="email" required/>
+      <span class="icon">✉</span>
+    </div>
+
+    <div class="field">
+      <input type="password" name="password" id="login-password"
+             placeholder="Password" autocomplete="current-password" required/>
+      <span class="icon toggle-pw" onclick="togglePw('login-password', this)">🔒</span>
+    </div>
+
+    <div id="login-error" class="error-msg">Invalid email or password.</div>
+
+    <div class="row">
+      <label><input type="checkbox" id="remember" name="remember"/> Remember me</label>
+      <a href="#" onclick="showForgot()">Forgot Password?</a>
+    </div>
+
+    <button type="submit" class="btn-primary">Login</button>
+  </form>
+
+  <div class="divider">or continue with</div>
+
+  <div class="social-btns">
+    <button class="btn-social" onclick="oauthLogin('google')">
+      <!-- Google icon -->
+      <svg viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.2 0 5.9 1.1 8.1 3.1l6-6C34.5 3.2 29.6 1 24 1 14.9 1 7.2 6.5 3.9 14.3l7 5.4C12.6 13.2 17.8 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.4c-.5 2.8-2.1 5.2-4.5 6.8l7 5.4c4.1-3.8 6.5-9.4 6.5-16.2z"/>
+        <path fill="#FBBC05" d="M10.9 28.3A14.6 14.6 0 0 1 9.5 24c0-1.5.3-3 .7-4.3l-7-5.4A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l8.4-6.4z"/>
+        <path fill="#34A853" d="M24 47c5.6 0 10.3-1.8 13.7-5l-7-5.4c-1.9 1.3-4.3 2-6.7 2-6.2 0-11.4-3.7-13.2-9.2l-8.4 6.4C7.2 41.5 14.9 47 24 47z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <button class="btn-social" onclick="oauthLogin('facebook')">
+      <!-- Facebook icon -->
+      <svg viewBox="0 0 48 48">
+        <path fill="#1877F2" d="M48 24C48 10.7 37.3 0 24 0S0 10.7 0 24c0 12 8.8 21.9 20.3 23.7V30.9h-6.1V24h6.1v-5.3c0-6 3.6-9.4 9.1-9.4 2.6 0 5.4.5 5.4.5v5.9h-3c-3 0-3.9 1.9-3.9 3.7V24h6.6l-1.1 6.9h-5.6v16.8C39.2 45.9 48 36 48 24z"/>
+        <path fill="#fff" d="M33.4 30.9l1.1-6.9h-6.6v-4.5c0-1.9.9-3.7 3.9-3.7h3v-5.9s-2.7-.5-5.4-.5c-5.5 0-9.1 3.4-9.1 9.4V24h-6.1v6.9h6.1v16.8a24.2 24.2 0 0 0 7.4 0V30.9h5.7z"/>
+      </svg>
+      Continue with Facebook
+    </button>
+  </div>
+
+  <p class="footer-link">Don't have an account? <a href="#" onclick="switchPanel('register')">Register</a></p>
+</div>
+
+<!-- ── Register Card ── -->
+<div class="card" id="register-panel">
+  <button class="close-btn" onclick="switchPanel('login')">✕</button>
+  <h2>Register</h2>
+
+  <form id="register-form" autocomplete="on" onsubmit="handleRegister(event)">
+    <div class="field">
+      <input type="text" name="name" id="reg-name"
+             placeholder="Full Name" autocomplete="name" required/>
+      <span class="icon">👤</span>
+    </div>
+
+    <div class="field">
+      <input type="email" name="email" id="reg-email"
+             placeholder="Email" autocomplete="email" required/>
+      <span class="icon">✉</span>
+    </div>
+
+    <div class="field">
+      <input type="password" name="password" id="reg-password"
+             placeholder="Password" autocomplete="new-password" required minlength="6"/>
+      <span class="icon toggle-pw" onclick="togglePw('reg-password', this)">🔒</span>
+    </div>
+
+    <div class="field">
+      <input type="password" name="confirm-password" id="reg-confirm"
+             placeholder="Confirm Password" autocomplete="new-password" required/>
+      <span class="icon toggle-pw" onclick="togglePw('reg-confirm', this)">🔒</span>
+    </div>
+
+    <div id="reg-error" class="error-msg">Passwords do not match.</div>
+
+    <button type="submit" class="btn-primary" style="margin-top:6px;">Create Account</button>
+  </form>
+
+  <div class="divider">or sign up with</div>
+
+  <div class="social-btns">
+    <button class="btn-social" onclick="oauthLogin('google')">
+      <svg viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.2 0 5.9 1.1 8.1 3.1l6-6C34.5 3.2 29.6 1 24 1 14.9 1 7.2 6.5 3.9 14.3l7 5.4C12.6 13.2 17.8 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.4c-.5 2.8-2.1 5.2-4.5 6.8l7 5.4c4.1-3.8 6.5-9.4 6.5-16.2z"/>
+        <path fill="#FBBC05" d="M10.9 28.3A14.6 14.6 0 0 1 9.5 24c0-1.5.3-3 .7-4.3l-7-5.4A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l8.4-6.4z"/>
+        <path fill="#34A853" d="M24 47c5.6 0 10.3-1.8 13.7-5l-7-5.4c-1.9 1.3-4.3 2-6.7 2-6.2 0-11.4-3.7-13.2-9.2l-8.4 6.4C7.2 41.5 14.9 47 24 47z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      Continue with Google
+    </button>
+    <button class="btn-social" onclick="oauthLogin('facebook')">
+      <svg viewBox="0 0 48 48">
+        <path fill="#1877F2" d="M48 24C48 10.7 37.3 0 24 0S0 10.7 0 24c0 12 8.8 21.9 20.3 23.7V30.9h-6.1V24h6.1v-5.3c0-6 3.6-9.4 9.1-9.4 2.6 0 5.4.5 5.4.5v5.9h-3c-3 0-3.9 1.9-3.9 3.7V24h6.6l-1.1 6.9h-5.6v16.8C39.2 45.9 48 36 48 24z"/>
+        <path fill="#fff" d="M33.4 30.9l1.1-6.9h-6.6v-4.5c0-1.9.9-3.7 3.9-3.7h3v-5.9s-2.7-.5-5.4-.5c-5.5 0-9.1 3.4-9.1 9.4V24h-6.1v6.9h6.1v16.8a24.2 24.2 0 0 0 7.4 0V30.9h5.7z"/>
+      </svg>
+      Continue with Facebook
+    </button>
+  </div>
+
+  <p class="footer-link">Already have an account? <a href="#" onclick="switchPanel('login')">Login</a></p>
+</div>
+
+<!-- ── Password Save Toast ── -->
+<div class="toast" id="save-toast">
+  💾 Save this password for Story Co-Writer?
+  <button class="save-btn"   onclick="savePassword()">Save</button>
+  <button class="nosave-btn" onclick="dismissToast()">Not now</button>
+</div>
+
+<script>
+  const API = 'http://localhost:5000';
+
+  /* ── Panel switching ── */
+  function switchPanel(panel) {
+    document.getElementById('login-panel').style.display    = panel === 'login'    ? '' : 'none';
+    document.getElementById('register-panel').style.display = panel === 'register' ? '' : 'none';
+    clearMessages();
+  }
+
+  function clearMessages() {
+    document.getElementById('login-error').style.display = 'none';
+    document.getElementById('reg-error').style.display   = 'none';
+  }
+
+  /* ── Toggle password visibility ── */
+  function togglePw(id, icon) {
+    const input = document.getElementById(id);
+    if (input.type === 'password') { input.type = 'text';     icon.textContent = '🔓'; }
+    else                           { input.type = 'password'; icon.textContent = '🔒'; }
+  }
+
+  /* ── Show inline message ── */
+  function showMsg(id, text, isError = true) {
+    const el = document.getElementById(id);
+    el.textContent      = text;
+    el.style.display    = 'block';
+    el.style.color      = isError ? '#ff8080' : '#7eda9c';
+  }
+
+  /* ── Check email with Python backend → hint user account exists ── */
+  document.getElementById('login-email').addEventListener('blur', async function () {
+    const email   = this.value.trim().toLowerCase();
+    const pwField = document.getElementById('login-password');
+    if (!email) return;
+    try {
+      const res  = await fetch(`${API}/api/check-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (data.exists) {
+        /* Account found — nudge browser's native autofill */
+        pwField.style.borderColor = 'rgba(100,200,120,0.6)';
+        pwField.placeholder       = 'Account found — enter password';
+      } else {
+        pwField.style.borderColor = '';
+        pwField.placeholder       = 'Password';
+      }
+    } catch (_) { /* server not reachable */ }
+  });
+
+  /* ── Login → Python backend ── */
+  async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
+    const pw    = document.getElementById('login-password').value;
+    const err   = 'login-error';
+
+    try {
+      const res  = await fetch(`${API}/api/login`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password: pw })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMsg(err, `Welcome back, ${data.name}! Redirecting…`, false);
+        setTimeout(() => { window.location.href = data.redirect; }, 800);
+      } else {
+        showMsg(err, data.message);
+      }
+    } catch (_) {
+      showMsg(err, 'Cannot reach auth server. Is auth_server.py running?');
+    }
+  }
+
+  /* ── Register → Python backend ── */
+  async function handleRegister(e) {
+    e.preventDefault();
+    const name    = document.getElementById('reg-name').value.trim();
+    const email   = document.getElementById('reg-email').value.trim().toLowerCase();
+    const pw      = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-confirm').value;
+    const err     = 'reg-error';
+
+    if (pw !== confirm) { showMsg(err, 'Passwords do not match.'); return; }
+
+    try {
+      const res  = await fetch(`${API}/api/register`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ name, email, password: pw })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showMsg(err, data.message, false);
+        showToast(email);
+        setTimeout(() => switchPanel('login'), 1800);
+      } else {
+        showMsg(err, data.message);
+      }
+    } catch (_) {
+      showMsg(err, 'Cannot reach auth server. Is auth_server.py running?');
+    }
+  }
+
+  /* ── Toast: ask user to save password (browser native prompt) ── */
+  function showToast(email) {
+    window._savedEmail = email;
+    document.getElementById('save-toast').classList.add('show');
+  }
+  function dismissToast() {
+    document.getElementById('save-toast').classList.remove('show');
+  }
+  function savePassword() {
+    /* Rely on the browser's native password-manager via autocomplete attributes.
+       We pre-fill login email so the browser offers to save on next submit. */
+    document.getElementById('login-email').value = window._savedEmail || '';
+    dismissToast();
+    switchPanel('login');
+  }
+
+  /* ── OAuth placeholder ── */
+  function oauthLogin(provider) {
+    alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} OAuth: wire up your OAuth endpoint in auth_server.py.`);
+  }
+
+  /* ── Forgot password ── */
+  function showForgot() {
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) { alert('Enter your email first, then click Forgot Password.'); return; }
+    alert(`Password reset for ${email}: add a /api/forgot-password route in auth_server.py.`);
+  }
+</script>
+</body>
+</html>
