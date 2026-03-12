@@ -1,0 +1,4 @@
+streamlit
+ollama
+speech_recognition
+# PyAudio  # Install manually: pip install PyAudio

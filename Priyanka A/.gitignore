@@ -1,0 +1,17 @@
+# Streamlit sensitive files
+.streamlit/
+users.json
+stories_*.json
+*.json
+!stories.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
